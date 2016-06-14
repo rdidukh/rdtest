@@ -6,6 +6,7 @@
 #include <iostream>
 #include <vector>
 #include <string>
+#include <iomanip>
 
 namespace rdns
 {
@@ -55,11 +56,13 @@ namespace rdns
 
         if(!res)
         {
+            std::string cmpNameStr = std::string("To be ") + cmpName + ": ";
+            int width = cmpNameStr.length() < 10 ? 10 : cmpNameStr.length();
             std::cout << file << ":" << line << ": Failure" << '\n';
-            std::cout << "Expected: " << expStr << '\n';
-            std::cout << "Which is: " << expected << '\n';
-            std::cout << "To be " << cmpName << ": " << actual << '\n';
-            std::cout << "Which is: " << actStr << '\n';        
+            std::cout << std::setw(width) << "Expected: " << expStr << '\n';
+            std::cout << std::setw(width) << "Which is: " << expected << '\n';
+            std::cout << std::setw(width) << cmpNameStr << actStr << '\n';
+            std::cout << std::setw(width) << "Which is: " << actual << '\n';        
             return false;
         }
 
@@ -68,13 +71,14 @@ namespace rdns
     
 }
 
-
+#define CALL_EXPECT_COMMON(expected, actual, comp, cmpName) \
+(this->ok = rdns::expect_common(expected, actual, #expected, #actual, __FILE__, __LINE__, comp, cmpName))
 
 #define EXPECT_COMMON(expected, actual, comp, cmpName) \
-rdns::expect_common(expected, actual, #expected, #actual, __FILE__, __LINE__, comp, cmpName) || std::cout
+CALL_EXPECT_COMMON(expected, actual, comp, cmpName) || (this->ok = false) || std::cout
 
 #define ASSERT_COMMON(expected, actual, comp, cmpName) \
-rdns::expect_common(expected, actual, #expected, #actual, __FILE__, __LINE__, comp, cmpName) || return VoidReturner() = std::cout
+CALL_EXPECT_COMMON(expected, actual, comp, cmpName) || (this->ok = false) || return VoidReturner() = std::cout
 
 #define EXPECT_EQ(expected, actual) EXPECT_COMMON(expected, actual, rdns::Cmp_Eq(), "equal to")
 

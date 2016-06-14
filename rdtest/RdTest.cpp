@@ -43,41 +43,81 @@ void RdBigTest::addLittleTest(RdLittleTest * littleTest)
     littleTests.push_back(littleTest);
 }
 
+static const char * plural(int x, bool upper = false)
+{
+    if(x == 1) return "";
+    return upper ? "S" : "s";
+}
+
 int RdBigTest::runAll()
 {
-    int result = 0;
+    int big = bigTests->size();
+    int little = 0;
+
     for(std::map<std::string, RdBigTest>::iterator it = bigTests->begin(); it != bigTests->end(); ++it)
-        result += it->second.run();
-    return result;
+    {
+        little += it->second.littleTests.size();
+    }
+
+    std::cout << GREEN_COLOR << "[==========]" << NO_COLOR;
+    std::cout << " Running " << little << " test" << plural(little) << " from " << big << " test case" << plural(big) << ".\n";
+    std::cout << GREEN_COLOR << "[----------]" << NO_COLOR << " Global test environment set-up.\n";
+
+    int failed = 0;
+
+    for(std::map<std::string, RdBigTest>::iterator it = bigTests->begin(); it != bigTests->end(); ++it)
+    {
+        failed += it->second.run();
+    }   
+
+    std::cout << GREEN_COLOR << "[----------]" << NO_COLOR << " Global test environment tear-down\n";
+    std::cout << GREEN_COLOR << "[==========] " << NO_COLOR;
+    std::cout << little << " test" << plural(little) << " from " << big << " test case" << plural(big) << " ran. (n/a ms total)\n";
+    std::cout << GREEN_COLOR <<  "[  PASSED  ] " << NO_COLOR << (little-failed) << " test" << plural(little-failed) << ".\n";
+
+    if(failed > 0)
+    {
+        std::cout << RED_COLOR << "[  FAILED  ] " << NO_COLOR << failed << " test" << plural(failed) << ", listed below:\n";
+        for(int i = 0; i < failed; i++)
+            std::cout << RED_COLOR << "[  FAILED  ]" << NO_COLOR << " N/A\n";
+        std::cout << '\n';
+        std::cout << failed << " FAILED TEST" << plural(failed, true) << "\n";
+    }
+
+    return failed;
 }
 
 int RdBigTest::run()
 {
-    unsigned ok = 0, fail = 0;
+    int testCount = littleTests.size();
+    std::cout << GREEN_COLOR << "[----------] " << NO_COLOR << testCount << " tests from " << name << '\n';
+
+    int fail = 0;
     for(std::vector<RdLittleTest *>::iterator it = littleTests.begin(); it != littleTests.end(); ++it)
     {
         RdLittleTest & littleTest = *(*it);
+
+        std::cout << GREEN_COLOR << "[ RUN      ] " << NO_COLOR << name << '.' << littleTest.name << '\n';
+
         littleTest.ok = true;
         littleTest.run();
         if(littleTest.ok)
         {
-            std::cout << GREEN_COLOR << name << "::" << littleTest.name << "   OK" << NO_COLOR << '\n';
-            ok++;
+            std::cout << GREEN_COLOR << "[       OK ] " << NO_COLOR;
         }
         else
         {
-            std::cout << RED_COLOR << name << "::" << littleTest.name << "   FAILED" << NO_COLOR << '\n';
             fail++;
+            std::cout << RED_COLOR << "[  FAILED  ] " << NO_COLOR;
         }
+
+        std::cout << name << '.' << littleTest.name << " (n/a ms)\n";
+
     }
-    if(fail > 0)
-    {
-        std::cout << RED_COLOR << name << ": " << fail << " out of " << (ok+fail) << "FAILED" << NO_COLOR << '\n';
-    }
-    else
-    {
-        std::cout << GREEN_COLOR << name << ": " << ok << " out of " << ok << " OK" << NO_COLOR << '\n';
-    }
+    
+    std::cout << GREEN_COLOR << "[----------] " << NO_COLOR;
+    std::cout << testCount << " test" << plural(testCount) << " from " << name << " (n/a ms total)\n\n";
+
     return fail;
 }
 

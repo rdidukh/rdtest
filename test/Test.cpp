@@ -14,6 +14,14 @@ TEST(ExpectEq, Int)
     EXPECT_EQ(x-1, y+2);
 }
 
+TEST(ExpectEq, ShouldFail)
+{
+    int x = 7;
+    EXPECT_EQ(1, 2);
+    EXPECT_EQ(x, 5+3);
+    EXPECT_EQ(5+3, x+2);
+}
+
 int main(int argc, char * argv[])
 {
     return RUN_ALL_TESTS();
