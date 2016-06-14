@@ -5,13 +5,13 @@
 #include <map>
 
 #ifdef _WIN32
-#define RED_COLOR 	""
-#define GREEN_COLOR	""
-#define NO_COLOR	""
+#define RED_COLOR       ""
+#define GREEN_COLOR	    ""
+#define NO_COLOR	    ""
 #else
-#define RED_COLOR 	"\033[0;31m"
-#define GREEN_COLOR	"\033[0;32m"
-#define NO_COLOR	"\033[0m"
+#define RED_COLOR       "\033[0;31m"
+#define GREEN_COLOR     "\033[0;32m"
+#define NO_COLOR	    "\033[0m"
 #endif
 
 namespace rdns
@@ -43,13 +43,15 @@ void RdBigTest::addLittleTest(RdLittleTest * littleTest)
     littleTests.push_back(littleTest);
 }
 
-void RdBigTest::runAll()
+int RdBigTest::runAll()
 {
+    int result = 0;
     for(std::map<std::string, RdBigTest>::iterator it = bigTests->begin(); it != bigTests->end(); ++it)
-        it->second.run();
+        result += it->second.run();
+    return result;
 }
 
-void RdBigTest::run()
+int RdBigTest::run()
 {
     unsigned ok = 0, fail = 0;
     for(std::vector<RdLittleTest *>::iterator it = littleTests.begin(); it != littleTests.end(); ++it)
@@ -76,6 +78,7 @@ void RdBigTest::run()
     {
         std::cout << GREEN_COLOR << name << ": " << ok << " out of " << ok << " OK" << NO_COLOR << '\n';
     }
+    return fail;
 }
 
 RdBigTestsInit::RdBigTestsInit()
